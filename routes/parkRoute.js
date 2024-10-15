@@ -6,6 +6,10 @@ const {LoggedIn} = require('../middleware')
 const ExpressError = require('../utils/ExpressError');
 const Park = require('../models/parks');
 const parkController = require('../controllers/parkController');
+const multer = require('multer');
+const {storage} = require('../cloudinary')
+const upload = multer({storage})
+
 
 const validatePark = (req,res,next) => {
     const { error } = parkSchema.validate(req.body);
@@ -32,13 +36,13 @@ router.get('/', catchAsync(parkController.index));
 
 router.get('/new',LoggedIn,parkController.renderNewPark);
 
-router.post('/', LoggedIn,validatePark, catchAsync(parkController.newPark))
+router.post('/', LoggedIn, upload.array('image'),validatePark,catchAsync(parkController.newPark))
 
 router.get('/:id', catchAsync(parkController.showRoute))
 
 router.get('/:id/edit', LoggedIn, isAuthor, catchAsync(parkController.editRoute))
 
-router.put('/:id', LoggedIn, isAuthor, validatePark, catchAsync(parkController.editPUT))
+router.put('/:id', LoggedIn, isAuthor, upload.array('image'),validatePark, catchAsync(parkController.editPUT))
 router.delete('/:id', LoggedIn, isAuthor, catchAsync(parkController.destroy))
 
 module.exports = router;
